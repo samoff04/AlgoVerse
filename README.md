@@ -72,7 +72,7 @@ Create or join contest rooms, solve shared problems, and compete through live So
 
 Analyze code using a hybrid approach combining:
 
-* Gemini-based code reasoning
+* AI-based code reasoning
 * JavaScript AST analysis with Acorn
 * TensorFlow.js heuristic classification
 
@@ -146,7 +146,7 @@ AlgoVerse/
 * Node.js 20+
 * npm 10+
 * MongoDB or MongoDB Atlas
-* Google Gemini API key
+* Anthropic API key
 
 ### Installation
 
@@ -165,7 +165,7 @@ PORT=5000
 MONGODB_URI=mongodb://localhost:27017/algoverse
 JWT_SECRET=your-long-random-secret
 CLIENT_URL=http://localhost:5173
-GEMINI_API_KEY=your-gemini-api-key
+ANTHROPIC_API_KEY=your-gemini-api-key
 ```
 
 Optional Google OAuth variables:
