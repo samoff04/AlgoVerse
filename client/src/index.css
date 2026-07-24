@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(127, 119, 221, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 10%, rgba(93, 202, 165, 0.08), transparent), #030303;
+  color: white;
+  min-height: 100vh;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-22px) rotate(6deg); }
+}
+.animate-float { animation: float ease-in-out infinite; }
+
+.active-code-line {
+  background: linear-gradient(90deg, rgba(168, 129, 255, 0.18), rgba(168, 129, 255, 0.04));
+  animation: line-pulse 1.2s ease-in-out infinite;
+}
+.active-code-line-marker {
+  border-left: 2px solid #a881ff;
+}
+@keyframes line-pulse {
+  0%, 100% { background-color: rgba(168, 129, 255, 0.14); }
+  50% { background-color: rgba(168, 129, 255, 0.24); }
+}
