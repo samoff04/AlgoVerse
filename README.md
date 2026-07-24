@@ -1,19 +1,6 @@
 # AlgoVerse
 
-<p align="center">
-  <strong>Interactive DSA Learning, Visualized and AI-Powered.</strong>
-</p>
-
-<p align="center">
-  A full-stack platform that transforms Data Structures and Algorithms into interactive 2D/3D visual experiences with AI-powered learning, interview practice, and real-time contests.
-</p>
-
-<p align="center">
-  <a href="#features">Features</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#project-structure">Project Structure</a>
-</p>
+A full-stack platform that transforms Data Structures and Algorithms into interactive 2D/3D visual experiences with AI-powered learning, interview practice, and real-time contests.
 
 ---
 
