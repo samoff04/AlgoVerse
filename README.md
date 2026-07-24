@@ -100,7 +100,7 @@ Track:
 | Database           | MongoDB, Mongoose                                              |
 | Authentication     | JWT, bcrypt, Passport.js, Google OAuth                         |
 | Real-Time          | Socket.io                                                      |
-| AI                 | Google Gemini API                                              |
+| AI                 | Anthropic API                                              |
 | ML & Code Analysis | TensorFlow.js, Acorn                                           |
 
 ---
