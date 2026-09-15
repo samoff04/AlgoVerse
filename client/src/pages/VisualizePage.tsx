@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 
 import { runUserCode } from "../lib/runUserCode";
 import {
@@ -54,6 +54,21 @@ const languageOrder: Language[] = [
   "cpp",
 ];
 
+type StackSnapshot = {
+  stack: ComponentProps<typeof StackScene>["stack"];
+};
+
+type ListSnapshot = {
+  nodes: ComponentProps<typeof LinkedListScene>["nodes"];
+  traversing: ComponentProps<typeof LinkedListScene>["traversing"];
+};
+
+type TreeSnapshot = {
+  nodes: ComponentProps<typeof TreeScene>["nodes"];
+  rootId: ComponentProps<typeof TreeScene>["rootId"];
+  activeNodeId: ComponentProps<typeof TreeScene>["activeNodeId"];
+};
+
 export default function VisualizePage() {
   const [type, setType] =
     useState<StructureType>("array");
@@ -104,10 +119,6 @@ export default function VisualizePage() {
 
   const hasAwarded = useRef(false);
 
-  /*
-   * Detect when the user writes code that
-   * appears to belong to another structure.
-   */
   useEffect(() => {
     if (code.trim().length < 20) {
       setSuggested(null);
@@ -121,9 +132,6 @@ export default function VisualizePage() {
     );
   }, [code, type]);
 
-  /*
-   * Parse array input safely.
-   */
   function parseInput(value: string) {
     return value
       .split(",")
@@ -135,9 +143,6 @@ export default function VisualizePage() {
       );
   }
 
-  /*
-   * Clear current visualization.
-   */
   function clearVisualization() {
     setArrayRun(null);
     setUniversalRun(null);
@@ -149,9 +154,6 @@ export default function VisualizePage() {
     resetPlayback();
   }
 
-  /*
-   * Change data structure.
-   */
   function handleTypeChange(
     next: StructureType
   ) {
@@ -170,9 +172,6 @@ export default function VisualizePage() {
     clearVisualization();
   }
 
-  /*
-   * Change programming language.
-   */
   function handleLanguageChange(
     next: Language
   ) {
@@ -185,9 +184,6 @@ export default function VisualizePage() {
     clearVisualization();
   }
 
-  /*
-   * Reset current editor.
-   */
   function handleReset() {
     setCode(
       structureTemplates[type].code[language]
@@ -202,18 +198,11 @@ export default function VisualizePage() {
     clearVisualization();
   }
 
-  /*
-   * Run the user's algorithm.
-   */
   function handleRun() {
     setExplanation(null);
 
     resetPlayback();
 
-    /*
-     * Currently only JavaScript can be
-     * executed directly in the browser.
-     */
     if (language !== "javascript") {
       setArrayRun(null);
       setUniversalRun(null);
@@ -230,9 +219,6 @@ export default function VisualizePage() {
     const functionName =
       structureTemplates[type].functionName;
 
-    /*
-     * ARRAY
-     */
     if (type === "array") {
       const testInput =
         parseInput(input);
@@ -266,9 +252,6 @@ export default function VisualizePage() {
       return;
     }
 
-    /*
-     * STACK / LINKED LIST / TREE
-     */
     const result = runUniversalCode(
       code,
       functionName,
@@ -288,9 +271,6 @@ export default function VisualizePage() {
     awardIfNeeded(result.success);
   }
 
-  /*
-   * Award progress after successful execution.
-   */
   function awardIfNeeded(
     success: boolean
   ) {
@@ -307,7 +287,6 @@ export default function VisualizePage() {
       .post("/progress", {
         algorithmSlug:
           `custom:${type}:${structureTemplates[type].functionName}`,
-
         masteryScore: 0.5,
       })
       .then((response) => {
@@ -318,9 +297,6 @@ export default function VisualizePage() {
       .catch(() => {});
   }
 
-  /*
-   * AI explanation.
-   */
   async function handleExplain() {
     const hasResult =
       type === "array"
@@ -341,7 +317,6 @@ export default function VisualizePage() {
             messages: [
               {
                 role: "user",
-
                 content: `Explain what this ${structureTemplates[
                   type
                 ].label.toLowerCase()} algorithm does, how it works step by step, and its time and space complexity.
@@ -366,9 +341,6 @@ ${code}
     }
   }
 
-  /*
-   * Array visualization state.
-   */
   const testInputArr =
     parseInput(input);
 
@@ -378,20 +350,14 @@ ${code}
           {
             initialArray:
               testInputArr,
-
             events:
               arrayRun.events,
-
             codeLineMap: {},
           },
-
           step
         )
       : null;
 
-  /*
-   * Universal visualization state.
-   */
   const universalSnapshot =
     universalRun &&
     universalRun.snapshots.length > 0
@@ -419,9 +385,6 @@ ${code}
         ? universalRun.error
         : null;
 
-  /*
-   * Render the correct visualization.
-   */
   function renderScene() {
     if (
       type === "array" &&
@@ -438,11 +401,12 @@ ${code}
       type === "stack" &&
       universalSnapshot
     ) {
+      const snapshot =
+        universalSnapshot as unknown as StackSnapshot;
+
       return (
         <StackScene
-          stack={
-            universalSnapshot.stack
-          }
+          stack={snapshot.stack}
         />
       );
     }
@@ -451,13 +415,14 @@ ${code}
       type === "list" &&
       universalSnapshot
     ) {
+      const snapshot =
+        universalSnapshot as unknown as ListSnapshot;
+
       return (
         <LinkedListScene
-          nodes={
-            universalSnapshot.nodes
-          }
+          nodes={snapshot.nodes}
           traversing={
-            universalSnapshot.traversing
+            snapshot.traversing
           }
         />
       );
@@ -467,16 +432,15 @@ ${code}
       type === "tree" &&
       universalSnapshot
     ) {
+      const snapshot =
+        universalSnapshot as unknown as TreeSnapshot;
+
       return (
         <TreeScene
-          nodes={
-            universalSnapshot.nodes
-          }
-          rootId={
-            universalSnapshot.rootId
-          }
+          nodes={snapshot.nodes}
+          rootId={snapshot.rootId}
           activeNodeId={
-            universalSnapshot.activeNodeId
+            snapshot.activeNodeId
           }
         />
       );
@@ -492,9 +456,6 @@ ${code}
   return (
     <AppShell>
       <div className="mx-auto max-w-7xl px-6 py-6">
-
-        {/* HEADER */}
-
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-2">
             <Code2
@@ -532,8 +493,6 @@ ${code}
           </div>
         </div>
 
-        {/* STRUCTURE SELECTOR */}
-
         <div className="mb-4 flex flex-wrap gap-2">
           {typeOrder.map((structure) => (
             <button
@@ -557,8 +516,6 @@ ${code}
             </button>
           ))}
         </div>
-
-        {/* LANGUAGE SELECTOR */}
 
         <div className="mb-5 flex flex-wrap items-center gap-2">
           <span className="mr-1 text-xs text-white/35">
@@ -587,8 +544,6 @@ ${code}
           ))}
         </div>
 
-        {/* SMART SUGGESTION */}
-
         {suggested && (
           <button
             onClick={() =>
@@ -610,14 +565,8 @@ ${code}
           </button>
         )}
 
-        {/* MAIN WORKSPACE */}
-
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[380px_1fr]">
-
-          {/* CODE PANEL */}
-
           <div className="space-y-3">
-
             <div className="flex items-start justify-between gap-3">
               <p className="text-xs leading-relaxed text-white/40">
                 {
@@ -650,8 +599,6 @@ ${code}
               />
             </div>
 
-            {/* ARRAY INPUT */}
-
             {type === "array" && (
               <input
                 value={input}
@@ -664,8 +611,6 @@ ${code}
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none transition focus:border-purple-400/40"
               />
             )}
-
-            {/* ACTIONS */}
 
             <div className="flex flex-wrap gap-2">
               <Button
@@ -700,8 +645,6 @@ ${code}
               </Button>
             </div>
 
-            {/* EXECUTION ERROR */}
-
             {runError && (
               <div className="flex items-start gap-2 rounded-lg border border-red-400/20 bg-red-500/[0.05] p-3 text-xs text-red-400">
                 <AlertCircle
@@ -715,8 +658,6 @@ ${code}
               </div>
             )}
 
-            {/* EXPLANATION */}
-
             {explanation && (
               <div className="rounded-lg border border-purple-400/20 bg-purple-500/[0.05] p-3 text-xs leading-relaxed text-white/80">
                 {explanation}
@@ -724,10 +665,7 @@ ${code}
             )}
           </div>
 
-          {/* VISUALIZATION PANEL */}
-
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-purple-400" />
@@ -760,8 +698,6 @@ ${code}
             )}
           </div>
         </div>
-
-        {/* FOOTER */}
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[11px] text-white/25">
           <span>

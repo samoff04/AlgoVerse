@@ -3,6 +3,12 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { TreeNode } from "../../engine-core/algorithms/bst";
 
+type LayoutNode = TreeNode & {
+  x: number;
+  y: number;
+  depth: number;
+};
+
 function useLabelTexture(
   text: string,
   color = "#ffffff",
@@ -39,10 +45,6 @@ function useLabelTexture(
     return texture;
   }, [text, color, size]);
 }
-
-/* ------------------------------------------------ */
-/* TREE LAYOUT */
-/* ------------------------------------------------ */
 
 function layoutTree(
   nodes: Record<string, TreeNode>,
@@ -99,10 +101,6 @@ function layoutTree(
   return layout;
 }
 
-/* ------------------------------------------------ */
-/* EDGE */
-/* ------------------------------------------------ */
-
 function Edge({
   from,
   to,
@@ -121,7 +119,6 @@ function Edge({
   }, [from.x, from.y, to.x, to.y]);
 
   const length = direction.length();
-
   const angle = Math.atan2(direction.y, direction.x);
 
   const midpoint = useMemo(
@@ -150,10 +147,8 @@ function Edge({
       rotation={[0, 0, angle]}
       scale={[0.01, 1, 1]}
     >
-      {/* Main connection */}
       <mesh>
         <boxGeometry args={[length, 0.055, 0.055]} />
-
         <meshBasicMaterial
           color="#454452"
           transparent
@@ -161,13 +156,11 @@ function Edge({
         />
       </mesh>
 
-      {/* Direction indicator */}
       <mesh
         position={[length / 2 - 0.12, 0, 0]}
         rotation={[0, 0, -Math.PI / 2]}
       >
         <coneGeometry args={[0.09, 0.22, 6]} />
-
         <meshBasicMaterial
           color="#77718f"
           transparent
@@ -177,10 +170,6 @@ function Edge({
     </group>
   );
 }
-
-/* ------------------------------------------------ */
-/* NODE */
-/* ------------------------------------------------ */
 
 function TreeNodeMesh({
   node,
@@ -208,7 +197,6 @@ function TreeNodeMesh({
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
-    // Slow smooth movement
     groupRef.current.position.x = THREE.MathUtils.damp(
       groupRef.current.position.x,
       targetPosition.x,
@@ -223,7 +211,6 @@ function TreeNodeMesh({
       delta
     );
 
-    // Slow pop-in
     if (!wasCreated.current) {
       groupRef.current.scale.lerp(
         new THREE.Vector3(1, 1, 1),
@@ -235,7 +222,6 @@ function TreeNodeMesh({
       }
     }
 
-    // Active node floating
     if (active) {
       groupRef.current.position.z =
         0.12 +
@@ -255,10 +241,8 @@ function TreeNodeMesh({
       ]}
       scale={[0.05, 0.05, 0.05]}
     >
-      {/* Outer glow */}
       <mesh position={[0, 0, -0.08]}>
         <sphereGeometry args={[0.68, 40, 40]} />
-
         <meshBasicMaterial
           color={active ? "#F0925C" : "#7F77DD"}
           transparent
@@ -266,10 +250,8 @@ function TreeNodeMesh({
         />
       </mesh>
 
-      {/* Main node */}
       <mesh castShadow receiveShadow>
         <sphereGeometry args={[0.48, 48, 48]} />
-
         <meshStandardMaterial
           color={active ? "#F0925C" : "#6258C4"}
           roughness={0.26}
@@ -277,10 +259,8 @@ function TreeNodeMesh({
         />
       </mesh>
 
-      {/* Gloss highlight */}
       <mesh position={[-0.15, 0.18, 0.39]}>
         <sphereGeometry args={[0.075, 16, 16]} />
-
         <meshBasicMaterial
           color="#ffffff"
           transparent
@@ -288,13 +268,11 @@ function TreeNodeMesh({
         />
       </mesh>
 
-      {/* NUMBER PLANE */}
       <mesh
         position={[0, 0, 0.62]}
         renderOrder={10}
       >
         <planeGeometry args={[0.7, 0.7]} />
-
         <meshBasicMaterial
           map={texture}
           transparent
@@ -306,10 +284,6 @@ function TreeNodeMesh({
     </group>
   );
 }
-
-/* ------------------------------------------------ */
-/* TREE TITLE */
-/* ------------------------------------------------ */
 
 function TreeTitle() {
   const texture = useLabelTexture(
@@ -331,10 +305,6 @@ function TreeTitle() {
     </sprite>
   );
 }
-
-/* ------------------------------------------------ */
-/* MAIN SCENE */
-/* ------------------------------------------------ */
 
 export function TreeScene({
   nodes,
@@ -373,7 +343,6 @@ export function TreeScene({
         args={["#08080C"]}
       />
 
-      {/* Lighting */}
       <ambientLight intensity={0.7} />
 
       <directionalLight
@@ -396,7 +365,6 @@ export function TreeScene({
 
       <TreeTitle />
 
-      {/* Edges behind nodes */}
       {edges.map(([from, to]) => (
         <Edge
           key={`${from.id}-${to.id}`}
@@ -405,7 +373,6 @@ export function TreeScene({
         />
       ))}
 
-      {/* Nodes */}
       {Object.values(layout).map((node) => (
         <TreeNodeMesh
           key={node.id}

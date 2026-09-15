@@ -91,7 +91,9 @@ export default function ContestRoomPage() {
   useEffect(() => {
     if (contest?.status === "active" && contest.startedAt) {
       intervalRef.current = setInterval(() => {
-        setElapsed(Date.now() - new Date(contest.startedAt!).getTime());
+        setElapsed(
+          Date.now() - new Date(contest.startedAt!).getTime(),
+        );
       }, 500);
     }
 
@@ -115,13 +117,16 @@ export default function ContestRoomPage() {
     );
   }
 
-  const isHost = user?.id === contest.hostId;
+  const currentContest = contest;
+  const currentProblem = problem;
 
-  const me = contest.participants.find(
+  const isHost = user?.id === currentContest.hostId;
+
+  const me = currentContest.participants.find(
     (p) => p.userId === user?.id,
   );
 
-  const sorted = [...contest.participants].sort((a, b) => {
+  const sorted = [...currentContest.participants].sort((a, b) => {
     if (
       a.status === "submitted" &&
       b.status !== "submitted"
@@ -155,7 +160,7 @@ export default function ContestRoomPage() {
 
     const result = runUserCode(
       code_,
-      problem!.functionName,
+      currentProblem.functionName,
       testInput,
     );
 
@@ -173,7 +178,7 @@ export default function ContestRoomPage() {
   }
 
   async function copyCode() {
-    await navigator.clipboard.writeText(contest.code);
+    await navigator.clipboard.writeText(currentContest.code);
 
     setCopied(true);
 
@@ -184,11 +189,7 @@ export default function ContestRoomPage() {
 
   const seconds = Math.floor(elapsed / 1000);
 
-  const mm = Math.floor(seconds / 60);
-
-  const ss = seconds % 60;
-
-  const totalSeconds = contest.timeLimitSeconds;
+  const totalSeconds = currentContest.timeLimitSeconds;
 
   const remainingSeconds = Math.max(
     0,
@@ -206,13 +207,11 @@ export default function ContestRoomPage() {
   return (
     <AppShell>
       <main className="relative min-h-screen overflow-hidden">
-        {/* Ambient background */}
         <div className="pointer-events-none absolute left-1/2 top-[-300px] h-[650px] w-[650px] -translate-x-1/2 rounded-full bg-purple-600/[0.07] blur-[150px]" />
 
         <div className="pointer-events-none absolute bottom-[-200px] right-[-150px] h-[500px] w-[500px] rounded-full bg-indigo-600/[0.05] blur-[140px]" />
 
         <div className="relative mx-auto max-w-[1500px] px-6 py-6 lg:px-10">
-          {/* Top bar */}
           <motion.header
             initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -251,7 +250,6 @@ export default function ContestRoomPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Room code */}
               <button
                 onClick={copyCode}
                 className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 transition hover:border-white/20 hover:bg-white/[0.05]"
@@ -262,7 +260,7 @@ export default function ContestRoomPage() {
                   </p>
 
                   <p className="font-mono text-sm font-medium tracking-[0.25em] text-white/80">
-                    {contest.code}
+                    {currentContest.code}
                   </p>
                 </div>
 
@@ -279,8 +277,7 @@ export default function ContestRoomPage() {
                 )}
               </button>
 
-              {/* Timer */}
-              {contest.status === "active" && (
+              {currentContest.status === "active" && (
                 <motion.div
                   animate={
                     isLowTime
@@ -312,9 +309,8 @@ export default function ContestRoomPage() {
             </div>
           </motion.header>
 
-          {/* Contest state banner */}
           <AnimatePresence mode="wait">
-            {contest.status === "lobby" && (
+            {currentContest.status === "lobby" && (
               <motion.div
                 key="lobby"
                 initial={{ opacity: 0, y: 10 }}
@@ -337,8 +333,8 @@ export default function ContestRoomPage() {
                       </p>
 
                       <p className="mt-1 text-xs text-white/40">
-                        {contest.participants.length} player
-                        {contest.participants.length !== 1
+                        {currentContest.participants.length} player
+                        {currentContest.participants.length !== 1
                           ? "s"
                           : ""}{" "}
                         in the arena
@@ -359,7 +355,7 @@ export default function ContestRoomPage() {
               </motion.div>
             )}
 
-            {contest.status === "finished" && (
+            {currentContest.status === "finished" && (
               <motion.div
                 key="finished"
                 initial={{ opacity: 0, y: 10 }}
@@ -384,15 +380,12 @@ export default function ContestRoomPage() {
             )}
           </AnimatePresence>
 
-          {/* Main workspace */}
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-            {/* Problem + editor */}
             <motion.section
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              {/* Problem header */}
               <div className="mb-5">
                 <div className="mb-3 flex items-center gap-2">
                   <span className="rounded-full border border-purple-400/20 bg-purple-500/10 px-2.5 py-1 text-[9px] font-medium uppercase tracking-widest text-purple-300">
@@ -401,21 +394,20 @@ export default function ContestRoomPage() {
 
                   <span className="flex items-center gap-1.5 text-[10px] text-white/30">
                     <Zap size={11} />
-                    {contest.timeLimitSeconds / 60} min
+                    {currentContest.timeLimitSeconds / 60} min
                   </span>
                 </div>
 
                 <h2 className="text-2xl font-medium tracking-tight">
-                  {problem.title}
+                  {currentProblem.title}
                 </h2>
 
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-white/50">
-                  {problem.prompt}
+                  {currentProblem.prompt}
                 </p>
               </div>
 
-              {/* Editor */}
-              {contest.status !== "lobby" && (
+              {currentContest.status !== "lobby" && (
                 <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#08080b] shadow-2xl shadow-black/20">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -481,7 +473,7 @@ export default function ContestRoomPage() {
                       disabled={
                         submitting ||
                         me?.status === "submitted" ||
-                        contest.status === "finished"
+                        currentContest.status === "finished"
                       }
                       className="rounded-lg"
                     >
@@ -507,7 +499,6 @@ export default function ContestRoomPage() {
               )}
             </motion.section>
 
-            {/* Leaderboard */}
             <motion.aside
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -535,7 +526,7 @@ export default function ContestRoomPage() {
                 </div>
 
                 <span className="text-xs text-white/30">
-                  {contest.participants.length}
+                  {currentContest.participants.length}
                 </span>
               </div>
 
@@ -634,7 +625,6 @@ export default function ContestRoomPage() {
                 </AnimatePresence>
               </div>
 
-              {/* Sidebar footer */}
               <div className="border-t border-white/10 px-5 py-4">
                 <div className="flex items-center gap-2 text-[10px] text-white/25">
                   <Users size={12} />
@@ -644,18 +634,17 @@ export default function ContestRoomPage() {
             </motion.aside>
           </div>
 
-          {/* Bottom stats */}
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <StatCard
               icon={Clock}
               label="Time limit"
-              value={`${contest.timeLimitSeconds / 60} minutes`}
+              value={`${currentContest.timeLimitSeconds / 60} minutes`}
             />
 
             <StatCard
               icon={Users}
               label="Participants"
-              value={`${contest.participants.length} competing`}
+              value={`${currentContest.participants.length} competing`}
             />
 
             <StatCard
@@ -664,7 +653,7 @@ export default function ContestRoomPage() {
               value={
                 me?.status === "submitted"
                   ? "Solution submitted"
-                  : contest.status === "active"
+                  : currentContest.status === "active"
                     ? "Currently solving"
                     : "Waiting to start"
               }

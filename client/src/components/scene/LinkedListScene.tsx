@@ -31,12 +31,10 @@ function useLabelTexture(
     const ctx = canvas.getContext("2d")!;
 
     ctx.clearRect(0, 0, width, height);
-
     ctx.font = `700 ${size}px Inter, Arial, sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
     ctx.fillText(text, width / 2, height / 2);
 
     const texture = new THREE.CanvasTexture(canvas);
@@ -46,10 +44,6 @@ function useLabelTexture(
     return texture;
   }, [text, color, size, width, height]);
 }
-
-/* ---------------------------------- */
-/* NODE */
-/* ---------------------------------- */
 
 function ListNode({
   index,
@@ -65,7 +59,6 @@ function ListNode({
   const groupRef = useRef<THREE.Group>(null);
 
   const x = index * NODE_GAP - ((total - 1) * NODE_GAP) / 2;
-
   const valueTexture = useLabelTexture(String(value), "#FFFFFF", 58);
 
   useFrame((state, delta) => {
@@ -85,10 +78,8 @@ function ListNode({
 
   return (
     <group ref={groupRef} position={[x, 0, 0]}>
-      {/* Outer node */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[NODE_WIDTH, NODE_HEIGHT, 0.18]} />
-
         <meshStandardMaterial
           color={active ? COLORS.active : COLORS.node}
           roughness={0.42}
@@ -96,16 +87,13 @@ function ListNode({
         />
       </mesh>
 
-      {/* Subtle top highlight */}
       <mesh position={[0, NODE_HEIGHT / 2 - 0.025, 0.1]}>
         <boxGeometry args={[NODE_WIDTH - 0.04, 0.04, 0.02]} />
-
         <meshBasicMaterial
           color={active ? "#FFB07D" : COLORS.nodeTop}
         />
       </mesh>
 
-      {/* VALUE */}
       <sprite
         position={[-0.25, 0, 0.15]}
         scale={[0.55, 0.36, 1]}
@@ -118,10 +106,8 @@ function ListNode({
         />
       </sprite>
 
-      {/* NEXT POINTER SLOT */}
       <mesh position={[0.51, 0, 0.12]}>
         <boxGeometry args={[0.30, 0.58, 0.05]} />
-
         <meshStandardMaterial
           color={active ? "#C96F47" : COLORS.pointer}
           roughness={0.5}
@@ -130,10 +116,6 @@ function ListNode({
     </group>
   );
 }
-
-/* ---------------------------------- */
-/* ANIMATED POINTER */
-/* ---------------------------------- */
 
 function Pointer({
   fromX,
@@ -149,49 +131,41 @@ function Pointer({
   const startX = fromX + NODE_WIDTH / 2 + 0.12;
   const endX = toX - NODE_WIDTH / 2 - 0.18;
 
-  const length = endX - startX;
-
-  const geometry = useMemo(() => {
-    const points = [
+  const line = useMemo(() => {
+    const geometry = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(startX, 0, 0.35),
       new THREE.Vector3(endX, 0, 0.35),
-    ];
+    ]);
 
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }, [startX, endX]);
+    const material = new THREE.LineBasicMaterial({
+      color: active ? "#F0925C" : COLORS.arrow,
+      transparent: true,
+      opacity: 0.75,
+      depthTest: false,
+    });
+
+    return new THREE.Line(geometry, material);
+  }, [startX, endX, active]);
 
   useFrame((state) => {
     if (!lineRef.current) return;
 
     const material = lineRef.current.material as THREE.LineBasicMaterial;
 
-    if (active) {
-      material.opacity =
-        0.65 + Math.sin(state.clock.elapsedTime * 5) * 0.25;
-    } else {
-      material.opacity = 0.75;
-    }
+    material.opacity = active
+      ? 0.65 + Math.sin(state.clock.elapsedTime * 5) * 0.25
+      : 0.75;
   });
 
   return (
     <group>
-      {/* Connection line */}
-      <line ref={lineRef} geometry={geometry}>
-        <lineBasicMaterial
-          color={active ? "#F0925C" : COLORS.arrow}
-          transparent
-          opacity={0.75}
-          depthTest={false}
-        />
-      </line>
+      <primitive ref={lineRef} object={line} />
 
-      {/* Arrow head */}
       <mesh
         position={[endX, 0, 0.38]}
         rotation={[0, 0, -Math.PI / 2]}
       >
         <coneGeometry args={[0.10, 0.28, 4]} />
-
         <meshBasicMaterial
           color={active ? "#F0925C" : COLORS.arrow}
           transparent
@@ -200,7 +174,6 @@ function Pointer({
         />
       </mesh>
 
-      {/* Moving signal particle */}
       {active && (
         <FlowParticle
           startX={startX}
@@ -210,10 +183,6 @@ function Pointer({
     </group>
   );
 }
-
-/* ---------------------------------- */
-/* FLOW PARTICLE */
-/* ---------------------------------- */
 
 function FlowParticle({
   startX,
@@ -239,7 +208,6 @@ function FlowParticle({
   return (
     <mesh ref={ref} position={[startX, 0, 0.5]}>
       <sphereGeometry args={[0.045, 12, 12]} />
-
       <meshBasicMaterial
         color="#FFD0B5"
         transparent
@@ -249,10 +217,6 @@ function FlowParticle({
     </mesh>
   );
 }
-
-/* ---------------------------------- */
-/* NULL LABEL */
-/* ---------------------------------- */
 
 function NullLabel({ x }: { x: number }) {
   const texture = useLabelTexture("NULL", COLORS.null, 32);
@@ -272,10 +236,6 @@ function NullLabel({ x }: { x: number }) {
   );
 }
 
-/* ---------------------------------- */
-/* FLOOR */
-/* ---------------------------------- */
-
 function Floor({ width }: { width: number }) {
   return (
     <mesh
@@ -284,7 +244,6 @@ function Floor({ width }: { width: number }) {
       receiveShadow
     >
       <planeGeometry args={[width, 2.5]} />
-
       <meshStandardMaterial
         color="#0B0B10"
         roughness={1}
@@ -292,10 +251,6 @@ function Floor({ width }: { width: number }) {
     </mesh>
   );
 }
-
-/* ---------------------------------- */
-/* SCENE */
-/* ---------------------------------- */
 
 export function LinkedListScene({
   nodes,
@@ -344,7 +299,6 @@ export function LinkedListScene({
 
       <Floor width={totalWidth} />
 
-      {/* POINTERS FIRST */}
       {nodes.slice(0, -1).map((node, index) => {
         const fromX =
           index * NODE_GAP -
@@ -364,7 +318,6 @@ export function LinkedListScene({
         );
       })}
 
-      {/* NODES */}
       {nodes.map((node, index) => (
         <ListNode
           key={node.id}
@@ -375,7 +328,6 @@ export function LinkedListScene({
         />
       ))}
 
-      {/* NULL */}
       {total > 0 && (
         <NullLabel
           x={

@@ -167,12 +167,10 @@ export default function DashboardPage() {
   return (
     <AppShell>
       <div className="relative mx-auto max-w-7xl overflow-hidden px-6 py-8 lg:px-10">
-        {/* Ambient background */}
         <div className="pointer-events-none absolute left-1/2 top-[-250px] h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-purple-600/[0.07] blur-[140px]" />
 
         <div className="pointer-events-none absolute right-[-200px] top-[400px] h-[500px] w-[500px] rounded-full bg-indigo-600/[0.04] blur-[140px]" />
 
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -213,7 +211,6 @@ export default function DashboardPage() {
           </Link>
         </motion.div>
 
-        {/* Stats */}
         <div className="relative mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <StatCard
             icon={Flame}
@@ -243,7 +240,6 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* AI Mission */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
@@ -294,9 +290,7 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Main content grid */}
         <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
-          {/* Progress */}
           <motion.section
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
@@ -378,7 +372,6 @@ export default function DashboardPage() {
             </div>
           </motion.section>
 
-          {/* Recent Activity */}
           <motion.section
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
@@ -437,7 +430,6 @@ export default function DashboardPage() {
           </motion.section>
         </div>
 
-        {/* Modules */}
         <motion.section
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
@@ -455,7 +447,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {modules.map((module, index) => {
+            {modules.map((module) => {
               const Icon = module.icon;
 
               return (

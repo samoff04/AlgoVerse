@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { problems, categories } from "../interview/problems";
 import { AppShell } from "../components/layout/AppShell";
 import {
-  Trophy,
   Filter,
   Search,
   Clock3,
